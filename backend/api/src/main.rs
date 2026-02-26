@@ -135,9 +135,23 @@ async fn main() -> Result<()> {
         tracing::error!("Failed to register metrics: {}", e);
     }
 
+    // Initialize Job Engine
+    let (job_engine, job_rx) = soroban_batch::engine::JobEngine::new();
+    let job_engine = Arc::new(job_engine);
+    let job_engine_worker = job_engine.clone();
+    
+    // Spawn background worker
+    tokio::spawn(async move {
+        job_engine_worker.run_worker(job_rx).await;
+    });
+
     // Create app state
     let is_shutting_down = Arc::new(AtomicBool::new(false));
-    let state = AppState::new(pool.clone(), registry, is_shutting_down.clone());
+openapi-doc
+ openapi-doc
+    let state = AppState::new(pool.clone(), registry, job_engine, is_shutting_down.clone());
+    
+
 
     // Spawn the background DB and cache monitoring task
     db_monitoring::spawn_db_monitoring_task(pool.clone(), state.cache.clone());
@@ -187,6 +201,8 @@ async fn main() -> Result<()> {
         .merge(routes::contract_routes())
         .merge(routes::publisher_routes())
         .merge(routes::health_routes())
+        .merge(routes::migration_routes())
+        .merge(routes::openapi_routes())
         .merge(routes::health_monitor_routes())
         .merge(routes::admin_routes())
         .merge(routes::compatibility_dashboard_routes())

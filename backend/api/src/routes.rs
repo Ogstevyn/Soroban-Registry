@@ -1,3 +1,15 @@
+use crate::{
+openapi-doc
+    openapi::ApiDoc,
+    batch_verify_handlers,
+    handlers,
+    metrics_handler,
+    breaking_changes,
+    deprecation_handlers,
+    custom_metrics_handlers,
+    state::AppState,
+    breaking_changes, compatibility_testing_handlers, custom_metrics_handlers,
+    deprecation_handlers, handlers, metrics_handler, migration_handlers, state::AppState,
 use axum::{
     middleware,
     routing::{get, patch, post},
@@ -10,6 +22,8 @@ use crate::{
     handlers, metrics_handler, migration_handlers, performance_handlers, simulation_handlers,
     state::AppState,
 };
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 pub fn observability_routes() -> Router<AppState> {
     Router::new().route("/metrics", get(metrics_handler::metrics_endpoint))
@@ -172,6 +186,11 @@ pub fn contract_routes() -> Router<AppState> {
     // TODO: backup_routes, notification_routes, and post_incident_routes
     // are available in the api library crate but need architectural refactoring
     // to be integrated with the main AppState
+}
+
+pub fn openapi_routes() -> Router<AppState> {
+    Router::new()
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
 }
 
 pub fn publisher_routes() -> Router<AppState> {
