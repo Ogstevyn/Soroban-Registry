@@ -147,6 +147,10 @@ async fn main() -> Result<()> {
 
     // Create app state
     let is_shutting_down = Arc::new(AtomicBool::new(false));
+background-job-queue
+  background-job-queue
+    let state = AppState::new(pool.clone(), registry, job_engine, is_shutting_down.clone());
+    
 openapi-doc
  openapi-doc
     let state = AppState::new(pool.clone(), registry, job_engine, is_shutting_down.clone());
@@ -166,6 +170,7 @@ openapi-doc
     // Warm up the cache
     state.cache.clone().warm_up(pool.clone());
 
+main
     let rate_limit_state = RateLimitState::from_env();
     rate_limit_state.spawn_eviction_task();
 
